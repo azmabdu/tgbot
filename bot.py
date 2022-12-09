@@ -62,25 +62,35 @@ def publish(message):
 
 @bot.message_handler(commands=['start'])
 def hello(message):
-    name = message.from_user.first_name
+    print(message.from_user.first_name, '-', message.from_user.username)
     bot.send_message(message.chat.id, 'Hello, ' +
                      message.from_user.first_name, reply_markup=markup)
 
 
 @bot.message_handler(regexp='^Clothes👕$')
 def clothes(message):
-    print(*all_objects)
-    for object in all_objects:
-        img = object.photo_url
-        bot.send_photo(message.chat.id, photo=open(img, 'rb'),
-                       caption=f'Name 👤: {object.name}\nType 👔: {object.type.capitalize()}\nSize📎: {object.size}\nGender 🙋🏻: {object.gender}\nState ⭐️: {object.state.capitalize()}')
+    print(message.from_user.first_name, '-', message.from_user.username)
+    if len(all_objects) != 0:
+        print(*all_objects)
+        try:
+            for object in all_objects:
+                if object.photo_url:
+                    img = object.photo_url
+                else:
+                    img = 'recources/no-photo.jpg'
+                bot.send_photo(message.chat.id, photo=open(img, 'rb'),
+                               caption=f'Name 👤: {object.name}\nType 👔: {object.type}\nSize📎: {object.size}\nGender 🙋🏻: {object.gender}\nState ⭐️: {object.state}')
+        except Exception:
+            bot.send_message(message.chat.id, Exception, reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, 'No Products Yet',
+                         reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def call_query_type(call):
     if call.data in list:
-        type = call.data
-        obj.type = type
+        obj.type = call.data
         bot.send_message(chat_id=call.message.chat.id, text='Enter Size: ')
 
     elif call.data in ['new', 'second_hand']:
@@ -117,4 +127,4 @@ def get_photo(message):
     bot.send_message(message.chat.id, '✅ Done!')
 
 
-bot.polling()
+bot.infinity_polling()
